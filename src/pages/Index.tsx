@@ -1,6 +1,7 @@
 import BlogHeader from "@/components/BlogHeader";
 import BlogHero from "@/components/BlogHero";
 import BlogCard from "@/components/BlogCard";
+import BlogSidebar from "@/components/BlogSidebar";
 import Newsletter from "@/components/Newsletter";
 import { blogPosts } from "@/data/blogPosts";
 
@@ -13,33 +14,40 @@ const Index = () => {
       <BlogHeader />
       <BlogHero />
       
-      {/* Featured Post Section */}
-      <section className="py-16 px-4">
-        <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
-            Post em Destaque
-          </h2>
-          {featuredPost && (
-            <div className="max-w-4xl mx-auto">
-              <BlogCard {...featuredPost} />
-            </div>
-          )}
-        </div>
-      </section>
+      {/* Main Content with Sidebar */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex gap-8">
+          {/* Main Content */}
+          <main className="flex-1">
+            {/* Featured Post Section */}
+            <section className="mb-16">
+              <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
+                Post em Destaque
+              </h2>
+              {featuredPost && (
+                <div className="max-w-4xl mx-auto">
+                  <BlogCard {...featuredPost} />
+                </div>
+              )}
+            </section>
 
-      {/* Recent Posts Section */}
-      <section className="py-16 px-4 bg-secondary/30">
-        <div className="container mx-auto">
-          <h2 className="text-3xl font-bold text-foreground mb-12 text-center">
-            Últimos Posts
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {regularPosts.map((post) => (
-              <BlogCard key={post.id} {...post} />
-            ))}
-          </div>
+            {/* Recent Posts Section */}
+            <section className="py-16 px-6 bg-secondary/30 rounded-2xl">
+              <h2 className="text-3xl font-bold text-foreground mb-12 text-center">
+                Últimos Posts
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {regularPosts.map((post) => (
+                  <BlogCard key={post.id} {...post} />
+                ))}
+              </div>
+            </section>
+          </main>
+
+          {/* Sidebar */}
+          <BlogSidebar />
         </div>
-      </section>
+      </div>
 
       <Newsletter />
       
