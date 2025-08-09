@@ -1,56 +1,97 @@
+import { useEffect } from "react";
 import BlogHeader from "@/components/BlogHeader";
-import BlogHero from "@/components/BlogHero";
 import BlogCard from "@/components/BlogCard";
-import BlogSidebar from "@/components/BlogSidebar";
 import Newsletter from "@/components/Newsletter";
 import { blogPosts } from "@/data/blogPosts";
 
 const Index = () => {
-  const featuredPost = blogPosts.find(post => post.featured);
-  const regularPosts = blogPosts.filter(post => !post.featured);
+  const featuredPost = blogPosts.find((post) => post.featured) ?? blogPosts[0];
+  const regularPosts = blogPosts.filter((post) => post.id !== featuredPost?.id);
+
+  const heroSidePosts = regularPosts.slice(0, 2);
+  const articleGridPosts = regularPosts.slice(2, 6);
+
+  const categoryCounts = regularPosts.reduce<Record<string, number>>((acc, p) => {
+    acc[p.category] = (acc[p.category] ?? 0) + 1;
+    return acc;
+  }, {});
+  const categories = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]);
+
+  useEffect(() => {
+    document.title = "MEI Digital Blog — Notícias e Dicas para MEI";
+    const desc = "Acompanhe notícias, legislação e dicas práticas para MEI no MEI Digital Blog.";
+    let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "description";
+      document.head.appendChild(meta);
+    }
+    meta.content = desc;
+
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonical) {
+      canonical = document.createElement("link");
+      canonical.rel = "canonical";
+      document.head.appendChild(canonical);
+    }
+    canonical.href = window.location.origin + window.location.pathname;
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
       <BlogHeader />
-      <BlogHero />
-      
-      {/* Main Content with Sidebar */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex gap-8">
-          {/* Main Content */}
-          <main className="flex-1">
-            {/* Featured Post Section */}
-            <section className="mb-16">
-              <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
-                Post em Destaque
-              </h2>
-              {featuredPost && (
-                <div className="max-w-4xl mx-auto">
-                  <BlogCard {...featuredPost} />
-                </div>
-              )}
-            </section>
 
-            {/* Recent Posts Section */}
-            <section className="py-16 px-6 bg-secondary/30 rounded-2xl">
-              <h2 className="text-3xl font-bold text-foreground mb-12 text-center">
-                Últimos Posts
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {regularPosts.map((post) => (
-                  <BlogCard key={post.id} {...post} />
-                ))}
-              </div>
-            </section>
-          </main>
+      <div className="container mx-auto px-4 py-6">
+        <header className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+            MEI Digital Blog — Notícias e Dicas para MEI
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Atualizações, legislação e insights para microempreendedores.
+          </p>
+        </header>
 
-          {/* Sidebar */}
-          <BlogSidebar />
-        </div>
+        {/* Hero: 1 destaque + 2 laterais */}
+        <section aria-label="Destaques" className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            {featuredPost && <BlogCard {...featuredPost} featured />}
+          </div>
+          <div className="space-y-6">
+            {heroSidePosts.map((post) => (
+              <BlogCard key={post.id} {...post} />
+            ))}
+          </div>
+        </section>
+
+        {/* Artigos */}
+        <section className="mt-10">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-foreground">Artigos</h2>
+            <a href="#" className="text-primary hover:underline text-sm">Ver todos</a>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            {articleGridPosts.map((post) => (
+              <BlogCard key={post.id} {...post} />
+            ))}
+          </div>
+        </section>
+
+        {/* Categorias */}
+        <section className="mt-12">
+          <h2 className="text-2xl font-bold text-foreground mb-4">Categorias</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {categories.map(([cat, count]) => (
+              <article key={cat} className="border border-border rounded-lg p-4 bg-card text-card-foreground">
+                <h3 className="font-semibold">{cat}</h3>
+                <p className="text-sm text-muted-foreground">{count} artigos</p>
+              </article>
+            ))}
+          </div>
+        </section>
       </div>
 
       <Newsletter />
-      
+
       {/* Footer */}
       <footer className="bg-primary text-primary-foreground py-12 px-4">
         <div className="container mx-auto text-center">
