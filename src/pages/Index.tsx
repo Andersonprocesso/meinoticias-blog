@@ -1,17 +1,30 @@
 import { useEffect } from "react";
+import { useSearchParams, Link } from "react-router-dom";
 import BlogHeader from "@/components/BlogHeader";
 import BlogCard from "@/components/BlogCard";
 import Newsletter from "@/components/Newsletter";
 import { blogPosts } from "@/data/blogPosts";
 
 const Index = () => {
-  const featuredPost = blogPosts.find((post) => post.featured) ?? blogPosts[0];
-  const regularPosts = blogPosts.filter((post) => post.id !== featuredPost?.id);
+  const [searchParams] = useSearchParams();
+  const selectedCategory = searchParams.get("category");
+
+  const filteredPosts = selectedCategory
+    ? blogPosts.filter((p) => p.category === selectedCategory)
+    : blogPosts;
+
+  const featuredPost =
+    filteredPosts.find((post) => post.featured) ?? filteredPosts[0];
+
+  const regularPosts = featuredPost
+    ? filteredPosts.filter((post) => post.id !== featuredPost.id)
+    : filteredPosts;
 
   const heroSidePosts = regularPosts.slice(0, 2);
   const articleGridPosts = regularPosts.slice(2, 6);
 
-  const categoryCounts = regularPosts.reduce<Record<string, number>>((acc, p) => {
+  // Category counts (for footer) based on all posts to keep consistency
+  const categoryCounts = blogPosts.reduce<Record<string, number>>((acc, p) => {
     acc[p.category] = (acc[p.category] ?? 0) + 1;
     return acc;
   }, {});
@@ -51,38 +64,47 @@ const Index = () => {
           </p>
         </header>
 
-        {/* Hero: 1 destaque + 2 laterais */}
-        <section aria-label="Destaques" className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            {featuredPost && <BlogCard {...featuredPost} featured />}
-          </div>
-          <div className="space-y-6">
-            {heroSidePosts.map((post) => (
-              <BlogCard key={post.id} {...post} />
-            ))}
-          </div>
-        </section>
+        {filteredPosts.length === 0 ? (
+          <section className="py-16 text-center text-muted-foreground">
+            <p>Nenhum post encontrado para a categoria selecionada.</p>
+          </section>
+        ) : (
+          <>
+            {/* Hero: 1 destaque + 2 laterais */}
+            <section aria-label="Destaques" className="grid gap-6 lg:grid-cols-3">
+              <div className="lg:col-span-2">
+                {featuredPost && <BlogCard {...featuredPost} featured />}
+              </div>
+              <div className="space-y-6">
+                {heroSidePosts.map((post) => (
+                  <BlogCard key={post.id} {...post} />
+                ))}
+              </div>
+            </section>
 
-        {/* Artigos */}
-        <section className="mt-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-foreground">Artigos</h2>
-            <a href="#" className="text-primary hover:underline text-sm">Ver todos</a>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-            {articleGridPosts.map((post) => (
-              <BlogCard key={post.id} {...post} />
-            ))}
-          </div>
-        </section>
+            {/* Artigos */}
+            <section className="mt-10">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-foreground">Artigos</h2>
+                <Link to="/" className="text-primary hover:underline text-sm">Ver todos</Link>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                {articleGridPosts.map((post) => (
+                  <BlogCard key={post.id} {...post} />
+                ))}
+              </div>
+            </section>
+          </>
+        )}
 
-        {/* Categorias */}
         <section className="mt-12">
           <h2 className="text-2xl font-bold text-foreground mb-4">Categorias</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {categories.map(([cat, count]) => (
               <article key={cat} className="border border-border rounded-lg p-4 bg-card text-card-foreground">
-                <h3 className="font-semibold">{cat}</h3>
+                <h3 className="font-semibold">
+                  <Link to={`/?category=${encodeURIComponent(cat)}`} className="hover:text-primary">{cat}</Link>
+                </h3>
                 <p className="text-sm text-muted-foreground">{count} artigos</p>
               </article>
             ))}
@@ -99,10 +121,12 @@ const Index = () => {
           <p className="text-primary-foreground/80 mb-6">
             Seu parceiro na jornada do microempreendedorismo
           </p>
-          <div className="flex justify-center space-x-8 text-sm">
-            <a href="#" className="hover:text-yellow-300 transition-colors">Sobre</a>
-            <a href="#" className="hover:text-yellow-300 transition-colors">Contato</a>
-            <a href="#" className="hover:text-yellow-300 transition-colors">Política de Privacidade</a>
+          <div className="flex flex-wrap justify-center gap-4 text-sm">
+            {categories.map(([cat]) => (
+              <Link key={cat} to={`/?category=${encodeURIComponent(cat)}`} className="hover:text-yellow-300 transition-colors">
+                {cat}
+              </Link>
+            ))}
           </div>
           <p className="text-primary-foreground/60 text-sm mt-6">
             © 2025 MEI Digital. Todos os direitos reservados.
