@@ -1,6 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Mail } from "lucide-react";
+import NewsletterForm from "./NewsletterForm";
 
 const Newsletter = () => {
   return (
@@ -16,18 +15,7 @@ const Newsletter = () => {
             Mantenha-se atualizado com as melhores práticas para o seu negócio.
           </p>
         </div>
-        
-        <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-          <Input 
-            type="email" 
-            placeholder="Seu melhor email"
-            className="flex-1"
-          />
-          <Button variant="hero" className="px-8">
-            Assinar Newsletter
-          </Button>
-        </div>
-        
+        <NewsletterForm />
         <p className="text-sm text-muted-foreground mt-4">
           Sem spam. Cancele a qualquer momento.
         </p>

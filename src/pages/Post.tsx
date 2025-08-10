@@ -6,11 +6,23 @@ import { blogPosts } from "@/data/blogPosts";
 import NotFound from "./NotFound";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, User } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import Comments from "@/components/Comments";
 
 const Post = () => {
   const { id } = useParams<{ id: string }>();
 
-  const post = useMemo(() => blogPosts.find((p) => p.id === id), [id]);
+  const { data: dbPost } = useQuery({
+    queryKey: ["post", id],
+    queryFn: async () => {
+      if (!id) return null;
+      const { data } = await supabase.from("posts").select("*").eq("id", id).maybeSingle();
+      return data as any | null;
+    },
+  });
+
+  const post = useMemo(() => dbPost ?? blogPosts.find((p) => p.id === id), [dbPost, id]);
 
   useEffect(() => {
     if (!post) return;
@@ -89,6 +101,11 @@ const Post = () => {
 
           <section className="text-base md:text-lg leading-relaxed text-foreground/90 whitespace-pre-line">
             {post.content}
+          </section>
+
+          <section className="mt-10">
+            <h2 className="text-xl font-semibold mb-4">Comentários</h2>
+            <Comments postId={post.id} />
           </section>
         </article>
       </main>

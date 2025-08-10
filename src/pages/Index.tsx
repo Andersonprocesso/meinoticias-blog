@@ -4,17 +4,32 @@ import BlogHeader from "@/components/BlogHeader";
 import BlogCard from "@/components/BlogCard";
 import Newsletter from "@/components/Newsletter";
 import { blogPosts } from "@/data/blogPosts";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import { triggerNewPostWebhook } from "@/lib/zapier";
+
+export type PostRecord = typeof blogPosts[number];
 
 const Index = () => {
   const [searchParams] = useSearchParams();
   const selectedCategory = searchParams.get("category");
 
-  const filteredPosts = selectedCategory
-    ? blogPosts.filter((p) => p.category === selectedCategory)
-    : blogPosts;
+  const { data: dbPosts } = useQuery({
+    queryKey: ["posts"],
+    queryFn: async () => {
+      const { data } = await supabase.from("posts").select("*").order("date", { ascending: false });
+      return (data as any[]) || [];
+    },
+  });
 
-  const featuredPost =
-    filteredPosts.find((post) => post.featured) ?? filteredPosts[0];
+  // Fallback para dados locais se não houver dados no banco
+  const posts: PostRecord[] = (dbPosts && dbPosts.length > 0 ? dbPosts : blogPosts) as any;
+
+  const filteredPosts = selectedCategory
+    ? posts.filter((p) => p.category === selectedCategory)
+    : posts;
+
+  const featuredPost = filteredPosts.find((post) => post.featured) ?? filteredPosts[0];
 
   const regularPosts = featuredPost
     ? filteredPosts.filter((post) => post.id !== featuredPost.id)
@@ -23,12 +38,54 @@ const Index = () => {
   const heroSidePosts = regularPosts.slice(0, 2);
   const articleGridPosts = regularPosts.slice(2, 6);
 
-  // Category counts (for footer) based on all posts to keep consistency
-  const categoryCounts = blogPosts.reduce<Record<string, number>>((acc, p) => {
+  // Contagem de categorias com base nos posts em uso (consistência topo/rodapé)
+  const categoryCounts = posts.reduce<Record<string, number>>((acc, p) => {
     acc[p.category] = (acc[p.category] ?? 0) + 1;
     return acc;
   }, {});
   const categories = Object.entries(categoryCounts).sort((a, b) => b[1] - a[1]);
+
+  // Migração automática inicial (insere dados locais se a tabela estiver vazia)
+  useEffect(() => {
+    const migrate = async () => {
+      try {
+        if ((dbPosts?.length ?? 0) === 0 && blogPosts.length > 0 && !localStorage.getItem("postsSeeded")) {
+          const rows = blogPosts.map((p) => ({ ...p }));
+          const { error } = await supabase.from("posts").upsert(rows, { onConflict: "id" });
+          if (!error) {
+            localStorage.setItem("postsSeeded", "1");
+          }
+        }
+      } catch (e) {
+        // silencioso: tabela pode não existir ainda
+      }
+    };
+    migrate();
+
+    // Realtime: dispara webhook no Zapier para novos posts
+    const channel = supabase
+      .channel("posts_insert_channel")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "posts" },
+        (payload: any) => {
+          const p = payload.new;
+          triggerNewPostWebhook({
+            id: p.id,
+            title: p.title,
+            excerpt: p.excerpt,
+            url: `${window.location.origin}/post/${p.id}`,
+            image: p.image,
+            category: p.category,
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [dbPosts]);
 
   useEffect(() => {
     document.title = "MEI Digital Blog — Notícias e Dicas para MEI";
@@ -73,11 +130,11 @@ const Index = () => {
             {/* Hero: 1 destaque + 2 laterais */}
             <section aria-label="Destaques" className="grid gap-6 lg:grid-cols-3">
               <div className="lg:col-span-2">
-                {featuredPost && <BlogCard {...featuredPost} featured />}
+                {featuredPost && <BlogCard {...(featuredPost as any)} featured />}
               </div>
               <div className="space-y-6">
                 {heroSidePosts.map((post) => (
-                  <BlogCard key={post.id} {...post} />
+                  <BlogCard key={post.id} {...(post as any)} />
                 ))}
               </div>
             </section>
@@ -90,7 +147,7 @@ const Index = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                 {articleGridPosts.map((post) => (
-                  <BlogCard key={post.id} {...post} />
+                  <BlogCard key={post.id} {...(post as any)} />
                 ))}
               </div>
             </section>

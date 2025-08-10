@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 import { blogPosts } from "@/data/blogPosts";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import NewsletterForm from "./NewsletterForm";
 
 const BlogHeader = () => {
   return (
@@ -52,9 +54,17 @@ const BlogHeader = () => {
                 className="pl-10 w-64"
               />
             </div>
-            <Button variant="outline" asChild>
-              <Link to="/">Assinar Newsletter</Link>
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline">Assinar Newsletter</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Assinar Newsletter</DialogTitle>
+                </DialogHeader>
+                <NewsletterForm inline />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </div>
