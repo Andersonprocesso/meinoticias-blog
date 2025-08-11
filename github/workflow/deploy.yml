@@ -12,20 +12,20 @@ jobs:
       - name: Clonar o repositório
         uses: actions/checkout@v3
 
-      - name: Configurar Node.js 18
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
+      # Configura o Bun para instalar dependências e fazer o build
+      - name: Configurar o Bun
+        uses: oven-sh/setup-bun@v1
 
-      - name: Instalar dependências
-        run: npm install
+      - name: Instalar dependências com Bun
+        run: bun install
 
-      - name: Build do projeto
-        run: npm run build
+      - name: Build do projeto com Bun
+        run: bun run build
 
       - name: Mostrar arquivos gerados
         run: ls -al dist/
 
+      # Envia os arquivos para o diretório correto na Hostinger
       - name: Deploy FTP para Hostinger
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
@@ -34,7 +34,7 @@ jobs:
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
           local-dir: dist/
-          server-dir: /
+          server-dir: public_html/ # <-- VERIFIQUE ESTE DIRETÓRIO!
           dangerous-clean-slate: true
           dry-run: false
           log-level: verbose
