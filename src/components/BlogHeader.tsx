@@ -29,11 +29,10 @@ const BlogHeader = () => {
               <img
                 src="/lovable-uploads/8d7a378f-b9d9-4e93-87a7-e799b0a089fb.png"
                 alt="Logo MEI Notícias"
-                className="h-10 w-10 md:h-12 md:w-12 rounded-sm"
+                className="h-14 w-14 md:h-16 md:w-16 rounded-sm"
                 loading="eager"
                 decoding="async"
               />
-              <h1 className="text-2xl font-bold text-primary">MEI Notícias</h1>
             </Link>
             <nav className="hidden md:flex items-center gap-4">
               <Link to="/" className="text-foreground hover:text-primary">Home</Link>

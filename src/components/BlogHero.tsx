@@ -13,10 +13,10 @@ const BlogHero = () => {
       </div>
       
       <div className="relative container mx-auto text-center text-white z-10">
-        <h2 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+        <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
           Notícias e Dicas <br />
           para <span className="text-yellow-300">MEI</span>
-        </h2>
+        </h1>
         <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto opacity-90">
           Mantenha-se atualizado com as últimas novidades, mudanças na legislação e dicas práticas 
           para microempreendedores individuais.
