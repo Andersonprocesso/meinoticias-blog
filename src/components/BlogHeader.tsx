@@ -29,7 +29,7 @@ const BlogHeader = () => {
               <img
                 src="/lovable-uploads/8d7a378f-b9d9-4e93-87a7-e799b0a089fb.png"
                 alt="Logo MEI Notícias"
-                className="h-8 w-8 rounded-sm"
+                className="h-10 w-10 md:h-12 md:w-12 rounded-sm"
                 loading="eager"
                 decoding="async"
               />
