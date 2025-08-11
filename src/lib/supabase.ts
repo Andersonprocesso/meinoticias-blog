@@ -5,10 +5,40 @@ const supabaseUrl = (window as any).__SUPABASE_URL__ || (import.meta as any).env
 const supabaseAnonKey = (window as any).__SUPABASE_ANON_KEY__ || (import.meta as any).env?.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn("Supabase URL/Key not found. Ensure Lovable Supabase integration is connected.");
+  console.warn(
+    "Supabase URL/Key not found. The app will run in read-only mode with local data. Connect Supabase via the green button in Lovable."
+  );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+function makeNoopClient() {
+  const NO_CFG_MSG = "Supabase not configured";
+  const chain: any = {
+    select: () => chain,
+    eq: () => chain,
+    order: async () => ({ data: [], error: null }),
+    maybeSingle: async () => ({ data: null, error: null }),
+  };
+  const tableOps: any = {
+    select: () => chain,
+    insert: async () => ({ error: new Error(NO_CFG_MSG) }),
+    update: async () => ({ error: new Error(NO_CFG_MSG) }),
+    upsert: async () => ({ error: new Error(NO_CFG_MSG) }),
+    eq: () => chain,
+    order: async () => ({ data: [], error: null }),
+  };
+  return {
+    from: () => tableOps,
+    channel: () => ({
+      on: () => ({ subscribe: () => ({ unsubscribe() {} }) }),
+      subscribe: () => ({ unsubscribe() {} }),
+    }),
+    removeChannel: () => {},
+  } as any;
+}
+
+export const supabase = (supabaseUrl && supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : (makeNoopClient() as any);
 
 export type Tables = {
   posts: {
