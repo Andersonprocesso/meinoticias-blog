@@ -13,7 +13,22 @@ const AdminSettings = () => {
     if (saved) setUrl(saved);
   }, []);
 
-  const save = () => {
+useEffect(() => {
+  document.title = "Configurações — MEI Digital";
+  const ensureMeta = (name: string, content: string) => {
+    let m = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
+    if (!m) {
+      m = document.createElement("meta");
+      m.name = name;
+      document.head.appendChild(m);
+    }
+    m.content = content;
+  };
+  ensureMeta("robots", "noindex, nofollow");
+  ensureMeta("googlebot", "noindex, nofollow");
+}, []);
+
+const save = () => {
     if (!url.startsWith("https://hooks.zapier.com/hooks/catch/")) {
       toast({ title: "URL inválida", description: "Cole a URL do Webhook do Zapier.", variant: "destructive" });
       return;

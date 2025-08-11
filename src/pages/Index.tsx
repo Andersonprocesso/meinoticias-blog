@@ -122,8 +122,24 @@ const Index = () => {
         </header>
 
         {filteredPosts.length === 0 ? (
-          <section className="py-16 text-center text-muted-foreground">
-            <p>Nenhum post encontrado para a categoria selecionada.</p>
+          <section className="py-16">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4">Conteúdo em breve nesta categoria</h2>
+            <article className="prose prose-neutral max-w-none text-foreground">
+              <p className="text-muted-foreground">
+                Ainda não publicamos artigos nesta categoria específica. Enquanto isso, reunimos orientações essenciais para o Microempreendedor Individual (MEI) que podem ajudar você a avançar hoje mesmo.
+              </p>
+              <ul className="list-disc pl-6 mt-4 text-muted-foreground">
+                <li>Passo a passo para manter suas obrigações em dia (DAS, notas fiscais e prazos).</li>
+                <li>Dicas para organizar finanças e separar contas pessoais das do negócio.</li>
+                <li>Como identificar oportunidades e aumentar sua base de clientes.</li>
+              </ul>
+              <p className="mt-4 text-muted-foreground">
+                Explore as outras categorias abaixo para encontrar conteúdos originais, atualizados e práticos sobre legislação, impostos e gestão do seu negócio MEI.
+              </p>
+              <p className="mt-4 text-muted-foreground">
+                Se você deseja sugerir um tema para publicarmos, entre em contato pelo nosso formulário de newsletter e conte sua necessidade. Assim priorizamos conteúdos de alto valor para nossa comunidade.
+              </p>
+            </article>
           </section>
         ) : (
           <>

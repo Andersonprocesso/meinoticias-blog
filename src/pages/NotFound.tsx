@@ -9,18 +9,33 @@ const NotFound = () => {
       "404 Error: User attempted to access non-existent route:",
       location.pathname
     );
+
+    document.title = "Página não encontrada — MEI Digital";
+    const ensureMeta = (name: string, content: string) => {
+      let m = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
+      if (!m) {
+        m = document.createElement("meta");
+        m.name = name;
+        document.head.appendChild(m);
+      }
+      m.content = content;
+    };
+    ensureMeta("robots", "noindex, nofollow");
+    ensureMeta("googlebot", "noindex, nofollow");
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
+    <main className="min-h-screen flex items-center justify-center bg-background">
+      <article className="text-center max-w-xl px-6">
+        <h1 className="text-4xl font-bold mb-3 text-foreground">404</h1>
+        <p className="text-lg text-muted-foreground mb-6">
+          Página não encontrada. O conteúdo que você procura pode ter sido movido ou não existe mais.
+        </p>
+        <a href="/" className="text-primary underline">
+          Voltar para a página inicial
         </a>
-      </div>
-    </div>
+      </article>
+    </main>
   );
 };
 
